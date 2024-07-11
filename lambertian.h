@@ -6,11 +6,12 @@ class lambertian : public material
 {
     private:
         color albedo;
+        material_type type = material_type::LAMBERTIAN;
 
     public:
         lambertian(const color& albedo) : albedo(albedo) {}
 
-        bool scatter(const ray& r_in, const hit_record& record, 
+        bool scatter(const ray& r_in, hit_record& record, 
         color& attenuation, ray& scattered) const override
         {
             // scatter_direction
@@ -24,6 +25,7 @@ class lambertian : public material
             scattered = ray(record.p, scatter_direction);
             // attenuation - decay
             attenuation = albedo;
+            record.mat_type = type;
             return true;
         }
 };

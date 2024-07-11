@@ -29,6 +29,9 @@ class sphere : public hittable
         sphere(double r, const vec3& vec, material_type&& mat) :
             rad(std::fmax(0, r)), cent(vec), mat(std::forward<material_type>(mat)) {}
         
+        // sphere(double r, const vec3& vec, std::shared_ptr<material> mat) :
+        //     rad(std::fmax(0, r)), cent(vec), mat(mat) {}
+
         double radius() const noexcept
         {
             return rad;
@@ -108,6 +111,7 @@ class sphere : public hittable
             auto outside_normal = normalize(record.p - cent);
             // auto outside_normal = (record.p - cent) / rad;
             record.set_face_normal(r, outside_normal);
+            record.mat = mat;
             //record.normal = outside_normal;
             return true;
         }
@@ -143,6 +147,7 @@ class sphere : public hittable
             auto outside_normal = normalize(record.p - cent);
             // auto outside_normal = (record.p - cent) / rad;
             record.set_face_normal(r, outside_normal);
+            record.mat = mat;
             //record.normal = outside_normal;
             return true;
         }

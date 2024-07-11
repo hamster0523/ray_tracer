@@ -3,6 +3,12 @@
 #include "rt.h"
 #include <memory>
 
+enum material_type
+{
+    LAMBERTIAN,
+    METAL
+};
+
 class material;
 
 // a hit point relative infomations
@@ -18,6 +24,7 @@ struct hit_record
     bool front_face;
     // hit point's material
     std::shared_ptr<material> mat;
+    material_type mat_type;
 
     // Assume that the normal (point against) the ray
     void set_face_normal(const ray& r, const  vec3& outward_normal)

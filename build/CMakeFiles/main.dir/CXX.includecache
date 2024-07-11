@@ -51,6 +51,8 @@ hittable.h
 /data2/lhj/ray_tracer/hittable.h
 hittable_list.h
 /data2/lhj/ray_tracer/hittable_list.h
+material.h
+/data2/lhj/ray_tracer/material.h
 
 /data2/lhj/ray_tracer/material.h
 rt.h
@@ -59,6 +61,10 @@ hittable.h
 /data2/lhj/ray_tracer/hittable.h
 
 /data2/lhj/ray_tracer/metal.h
+rt.h
+/data2/lhj/ray_tracer/rt.h
+material.h
+/data2/lhj/ray_tracer/material.h
 
 /data2/lhj/ray_tracer/ray.h
 vec3.h

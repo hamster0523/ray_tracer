@@ -12,7 +12,7 @@ class camera
         float aspect_ratio = 16.0f / 9.0f;  // Ratio of (image_width / image_height)
         int    image_width = 400;           // Rendered image width in pixel count
         int   sample_pixel = 300;           // Count of random samples for each pixel
-        int  max_recur_depth = 10;          // Maximum number of ray bounces into scene
+        int  max_recur_depth = 20;          // Maximum number of ray bounces into scene
 
         // Render -> Get the Final Image
         void render(const hittable& world_list)
