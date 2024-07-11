@@ -170,7 +170,6 @@ int main()
     //         color pixel_color = ray_color(r, world_list);
     //         write_color(std::cout, pixel_color);
     //     }
-    // }
 
     // std::clog << "\rDone.              \n";
 
