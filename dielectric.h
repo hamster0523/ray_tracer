@@ -29,6 +29,7 @@ class dieletric : public material
                 // front_face = dot(normalize(r.direction()), outward_normal) < 0;
                 double ri = record.front_face ? refraction_index : (1.0f / refraction_index);
                 auto refract_direction = refract(r_in.direction(), record.normal, ri);
+                // auto refract_direction_2 = refract2(normalize(r_in.direction()), normalize(record.normal), refraction_index);
                 scattered = ray(record.p, refract_direction);
                 return true;
             }
