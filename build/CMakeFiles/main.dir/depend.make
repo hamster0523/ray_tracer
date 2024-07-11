@@ -3,6 +3,7 @@
 
 CMakeFiles/main.dir/main.cpp.o: ../camera.h
 CMakeFiles/main.dir/main.cpp.o: ../color.h
+CMakeFiles/main.dir/main.cpp.o: ../dielectric.h
 CMakeFiles/main.dir/main.cpp.o: ../hittable.h
 CMakeFiles/main.dir/main.cpp.o: ../hittable_list.h
 CMakeFiles/main.dir/main.cpp.o: ../interval.h

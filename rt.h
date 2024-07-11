@@ -48,6 +48,7 @@ inline double random_double(double min, double max)
 #include "material.h"
 #include "lambertian.h"
 #include "metal.h"
+#include "dielectric.h"
 
 // 3.
 #include "hittable.h"

@@ -18,6 +18,10 @@ interval.h
 iostream
 -
 
+/data2/lhj/ray_tracer/dielectric.h
+material.h
+/data2/lhj/ray_tracer/material.h
+
 /data2/lhj/ray_tracer/hittable.h
 rt.h
 /data2/lhj/ray_tracer/rt.h
@@ -97,6 +101,8 @@ lambertian.h
 /data2/lhj/ray_tracer/lambertian.h
 metal.h
 /data2/lhj/ray_tracer/metal.h
+dielectric.h
+/data2/lhj/ray_tracer/dielectric.h
 hittable.h
 /data2/lhj/ray_tracer/hittable.h
 hittable_list.h

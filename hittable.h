@@ -6,8 +6,10 @@
 enum material_type
 {
     LAMBERTIAN,
-    METAL
+    METAL,
+    DIELETRIC
 };
+
 
 class material;
 

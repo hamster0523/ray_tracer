@@ -4,6 +4,7 @@
 CMakeFiles/main.dir/main.cpp.o
  /data2/lhj/ray_tracer/camera.h
  /data2/lhj/ray_tracer/color.h
+ /data2/lhj/ray_tracer/dielectric.h
  /data2/lhj/ray_tracer/hittable.h
  /data2/lhj/ray_tracer/hittable_list.h
  /data2/lhj/ray_tracer/interval.h

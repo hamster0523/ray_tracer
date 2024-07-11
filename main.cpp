@@ -194,8 +194,8 @@ int main()
     std::vector<std::shared_ptr<material>> mat = {
         std::make_shared<lambertian>(albedo(0.8, 0.8, 0.0)),
         std::make_shared<lambertian>(albedo(0.1, 0.2, 0.5)),
-        std::make_shared<metal>(albedo(0.8, 0.8, 0.8)),
-        std::make_shared<metal>(albedo(0.8, 0.6, 0.2)),
+        std::make_shared<metal>(albedo(0.8, 0.8, 0.8), 1.0),
+        std::make_shared<metal>(albedo(0.8, 0.6, 0.2), 0.4),
     };
 
     auto sphere_num = center.size();
