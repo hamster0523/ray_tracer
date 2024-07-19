@@ -23,6 +23,8 @@ class hittable_list : public hittable
         void add(const std::shared_ptr<hittable>& object)
         {
             objects.push_back(object);
+            // When object added -> expand the AABB 
+            bbox = merge_two_AABB(bbox, object->bounding_box());
         }
 
         bool hit(const ray& r, double ray_tmin, double ray_tmax, hit_record& record) const override
@@ -63,5 +65,13 @@ class hittable_list : public hittable
 
             return hit_anything;
         }
+
+        AABB bounding_box() const override
+        {
+            return bbox;
+        }
+
+    private:
+        AABB bbox;
 
 };

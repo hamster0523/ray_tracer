@@ -1,9 +1,10 @@
-#include <iostream>
 #include "rt.h"
 #include "sphere.h"
 #include "hittable.h"
 #include "hittable_list.h"
 #include "material.h"
+#include "bvh.h"
+#include "rt_stb_image.h"
 
 color ray_color(const ray& r)
 {
@@ -86,6 +87,183 @@ double hit_sphere_return_hit_point(const sphere& sphere, const ray& r)
         return (h - std::sqrt(discrim)) / a;
     }
 }
+
+void set_camera_param(camera& cam)
+{
+    cam.aspect_ratio = 16.0f / 9.0f;
+    cam.image_width = 600;
+    cam.sample_pixel = 200;
+    cam.max_recur_depth = 50;
+    cam.vfov = 20.0f;
+    cam.lookfrom = point3(13, 2, 3);
+    cam.lookat = point3(0, 0, 0);
+    cam.vup = vec3(0, 1, 0);
+    cam.defocus_angle = 0.6;
+    cam.focus_dist = 10.0;
+}
+
+void prepare_world_list(hittable_list& world)
+{
+    using namespace std;
+    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
+    auto checker_texture = make_shared<CheckerTexture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+    world.add(make_shared<sphere>(1000, point3(0,-1000,0), make_shared<lambertian>(checker_texture)));
+
+    for (int a = -11; a < 11; a++) {
+        for (int b = -11; b < 11; b++) {
+            auto choose_mat = random_double();
+            point3 center(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
+
+            if ((center - point3(4, 0.2, 0)).length() > 0.9) {
+                std::shared_ptr<material> sphere_material;
+
+                if (choose_mat < 0.8) {
+                    // // diffuse
+                    // auto albedo = color::random() * color::random();
+                    // sphere_material = make_shared<lambertian>(albedo);
+                    // world.add(make_shared<sphere>(0.2, center ,sphere_material));
+                    // -------------------------
+                    // Make diffuse sphere move
+                    // The center mpve start point is center
+                    // The center move destination is center + vec3(0, r, 0)
+                    auto albedo = albedo::random() * albedo::random();
+                    sphere_material = make_shared<lambertian>(albedo);
+                    auto destination = center + vec3(0, random_double(0, 0.5), 0);
+                    world.add(make_shared<sphere>(0.2, center, sphere_material));
+                } else if (choose_mat < 0.95) {
+                    // metal
+                    auto albedo = color::random(0.5, 1);
+                    auto fuzz = random_double(0, 0.5);
+                    sphere_material = make_shared<metal>(albedo, fuzz);
+                    world.add(make_shared<sphere>(0.2, center ,sphere_material));
+                } else {
+                    // glass
+                    sphere_material = make_shared<dieletric>(1.0f / 1.5f);
+                    world.add(make_shared<sphere>(0.2, center ,sphere_material));
+                }
+            }
+        }
+    }
+
+    auto material1 = make_shared<dieletric>(1.0 / 1.5);
+    world.add(make_shared<sphere>(1.0, point3(0, 1, 0),  material1));
+
+    auto material2 = make_shared<lambertian>(color(0.4, 0.2, 0.1));
+    world.add(make_shared<sphere>(1.0, point3(-4, 1, 0), material2));
+
+    auto material3 = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
+    world.add(make_shared<sphere>(1.0, point3(4, 1, 0), material3));
+
+    world = hittable_list(std::make_shared<bvh_node>(world));
+
+    
+}
+
+void boundcing_spheres()
+{
+    hittable_list world;
+
+    auto ground_material = std::make_shared<lambertian>(color(0.5, 0.5, 0.5));
+    world.add(std::make_shared<sphere>(1000 , point3(0, -1000, 0), ground_material));
+
+    camera cam;
+    set_camera_param(cam);
+
+    auto time1 = std::chrono::steady_clock::now();
+    cam.render(world);
+    std::clog << "\n Consume Time is : " << 
+    std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - time1).count() << "\n";
+}
+
+void checked_sphere()
+{
+    hittable_list world;
+
+    auto checker_material = std::make_shared<CheckerTexture>(0.32, color(0.2, 0.3, 0.1), color(0.9, 0.9, 0.9));
+
+    world.add(std::make_shared<sphere>(10, point3(0,-10, 0), std::make_shared<lambertian>(checker_material)));
+    world.add(std::make_shared<sphere>(10, point3(0, 10, 0), std::make_shared<lambertian>(checker_material)));
+
+    camera cam;
+
+    cam.aspect_ratio    = 16.0 / 9.0;
+    cam.image_width     = 600;
+    cam.sample_pixel    = 200;
+    cam.max_recur_depth = 50;
+    cam.vfov            = 20;
+    cam.lookfrom        = point3(13, 2, 3);
+    cam.lookat          = point3(0, 0, 0);
+    cam.vup             = vec3(0, 1, 0);
+    cam.defocus_angle   = 0;
+
+    auto time1 = std::chrono::steady_clock::now();
+    cam.render(world);
+    std::clog << std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - time1
+    ).count() << std::endl;
+}
+
+void face()
+{
+    auto face_texture = std::make_shared<ImageTexture>("awesomeface.png");
+    face_texture.get()->set_flip_v(false);
+    auto face_lambertian = std::make_shared<lambertian>(face_texture);
+    auto face_sphere = std::make_shared<sphere>(2, point3(0, 0, 0), face_lambertian);
+
+    camera cam;
+
+    cam.aspect_ratio    = 16.0 / 9.0;
+    cam.image_width     = 600;
+    cam.sample_pixel    = 200;
+    cam.max_recur_depth = 50;
+
+    cam.vfov            = 20;
+    cam.lookfrom        = point3(0, 0, 12);
+    cam.lookat          = point3(0, 0, 0);
+    cam.vup             = vec3(0, 1, 0);
+
+    cam.defocus_angle   = 0;
+
+    hittable_list world;
+    world.add(face_sphere);
+
+    auto time1 = std::chrono::steady_clock::now();
+    cam.render(world);
+    std::clog << std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - time1
+    ).count() << std::endl;
+}
+
+void earth()
+{
+    auto earth_texture = std::make_shared<ImageTexture>("earthmap.jpg");
+    auto earth_lambertian = std::make_shared<lambertian>(earth_texture);
+    auto earth_sphere = std::make_shared<sphere>(2, point3(0, 0, 0), earth_lambertian);
+
+    camera cam;
+
+    cam.aspect_ratio    = 16.0 / 9.0;
+    cam.image_width     = 400;
+    cam.sample_pixel    = 100;
+    cam.max_recur_depth = 70;
+
+    cam.vfov            = 20;
+    cam.lookfrom        = point3(0, 0, 12);
+    cam.lookat          = point3(0, 0, 0);
+    cam.vup             = vec3(0, 1, 0);
+
+    cam.defocus_angle   = 0;
+
+    hittable_list world;
+    world.add(earth_sphere);
+
+    auto time1 = std::chrono::steady_clock::now();
+    cam.render(world);
+    std::clog << std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - time1
+    ).count() << std::endl;
+}
+
 
 int main()
 {
@@ -173,44 +351,83 @@ int main()
 
     // std::clog << "\rDone.              \n";
 
-    // // -----------------------------------------------------
-    // All Wrap in Camera Class
-    hittable_list world;
+    // // // -----------------------------------------------------
+    // // All Wrap in Camera Class
+    // hittable_list world;
 
-    std::vector<point3> center = {
-        point3( 0.0, -100.999, -1.0),
-        point3( 0.0,      0.0, -1.2),
-        point3(-1.0,      0.0, -1.0),
-        point3( 1.0,      0.0, -1.0),
-    };
+    // std::vector<point3> center = {
+    //     point3( 0.0, -100.999, -1.0),
+    //     point3( 0.0,      0.0, -1.2),
+    //     point3(-1.0,      0.0, -1.0),
+    //     point3(-1.0,      0.0, -1.0),
+    //     point3( 1.0,      0.0, -1.0),
+    // };
 
-    std::vector<double> r = {
-        100.0f,
-        0.5f,
-        0.5f,
-        0.5f
-    };
+    // std::vector<double> r = {
+    //     100.0f,
+    //     0.5f,
+    //     0.5f,
+    //     0.4f,
+    //     0.5f
+    // };
 
-    std::vector<std::shared_ptr<material>> mat = {
-        std::make_shared<lambertian>(albedo(0.8, 0.8, 0.0)),
-        std::make_shared<lambertian>(albedo(0.1, 0.2, 0.5)),
-        std::make_shared<metal>(albedo(0.8, 0.8, 0.8), 1.0),
-        std::make_shared<metal>(albedo(0.8, 0.6, 0.2), 0.4),
-    };
+    // std::vector<std::shared_ptr<material>> mat = {
+    //     // material_ground
+    //     std::make_shared<lambertian>(albedo(0.8, 0.8, 0.0)),
+    //     // material_center
+    //     std::make_shared<lambertian>(albedo(0.1, 0.2, 0.5)),
+    //     // // std::make_shared<metal>(albedo(0.8, 0.8, 0.8), 1.0),
+    //     // // std::make_shared<dieletric>(1.0f / 1.5f),
+    //     // // Assume that the "air" is full of water and the bubble is full of air
+    //     // Outside bubble is bolic, inside bubble is air
+    //     std::make_shared<dieletric>(1.0f / 1.5f),
+    //     std::make_shared<dieletric>(1.5f / 1.0f),
+    //     std::make_shared<metal>(albedo(0.8, 0.6, 0.2), 1.0),
+    // };
 
-    auto sphere_num = center.size();
+    // auto sphere_num = center.size();
 
-    for(int i = 0; i < sphere_num; i ++)
+    // for(int i = 0; i < sphere_num; i ++)
+    // {
+    //     world.add(std::make_shared<sphere>(r[i], center[i], mat[i]));
+    // }
+
+    // -----------------------------------------------------
+    // All Wrap in prepare function for world_list
+    // hittable_list world;
+    // prepare_world_list(world);
+
+    // camera cam;
+    // cam.aspect_ratio = 16.0f / 9.0f;
+    // cam.image_width = 600;
+    // cam.sample_pixel = 200;
+    // cam.max_recur_depth = 50;
+    // cam.vfov = 20.0f;
+    // cam.lookfrom = point3(13, 2, 3);
+    // cam.lookat = point3(0, 0, 0);
+    // cam.vup = vec3(0, 1, 0);
+    // cam.defocus_angle = 0.6;
+    // cam.focus_dist = 10.0;
+
+    // auto time1 = std::chrono::steady_clock::now();
+    // cam.render(world);
+    // std::clog << "\n Consume Time is : " << 
+    // std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - time1).count() << "\n";
+
+    switch (4)
     {
-        world.add(std::make_shared<sphere>(r[i], center[i], mat[i]));
+        case 1 : boundcing_spheres(); break;
+        case 2 : checked_sphere();    break;
+        case 3 : face();              break;
+        case 4 : earth();             break;
     }
 
-    camera cam;
-    cam.aspect_ratio = 16.0f / 9.0f;
-    cam.image_width = 400;
-    cam.max_recur_depth = 50;
-
-    cam.render(world);
+    // Use deep copy -> low efficency
+    // auto a = rt_image("awesomeface.png");
+    // -------------------
+    // Good ! Explicit constructor
+    // rt_image a("awesomeface.png");
+    // std::clog << a.width() << " " << a.height() << std::endl;
 
     return 0;
 }

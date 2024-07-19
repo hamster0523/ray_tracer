@@ -4,8 +4,14 @@ project(ray_tracer)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 
+add_subdirectory(STB_IMAGE)
+
 add_executable(main main.cpp)
+
+target_link_libraries(main PUBLIC STB_IMAGE)
 
 # add_subdirectory(material)
 
 # target_link_libraries(main PUBLIC material)
+
+

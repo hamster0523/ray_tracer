@@ -1,0 +1,3 @@
+/data2/lhj/ray_tracer/build/CMakeFiles/rebuild_cache.dir
+/data2/lhj/ray_tracer/build/CMakeFiles/edit_cache.dir
+/data2/lhj/ray_tracer/build/CMakeFiles/main.dir

@@ -201,6 +201,16 @@ inline vec3 random_in_unit_sphere()
     }
 }
 
+inline vec3 random_in_unit_disk()
+{
+    while(true)
+    {
+        auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
+        if(p.length_squared() < 1)
+            return p;
+    }
+}
+
 inline vec3 random_unit_vector()
 {
     return normalize(random_in_unit_sphere());
@@ -242,6 +252,36 @@ inline vec3 reflect(const vec3& v, const vec3& n)
     return v - 2 * dot(v, n) * n;
 }
 
+// inline vec3 refract(const vec3& R_in, const vec3& normal, double param)
+// {
+//     // R_in is the unit vector from outside to point the hit point
+//     // normal is the hit point normal
+//     // param is the outside_refract_param / inside_refract_param
+
+//     auto normalized_Rin = normalize(R_in);
+//     auto normalized_normal = normalize(normal);
+
+//     auto cos_theta = std::fmin(dot(- normalized_Rin, normalized_normal), 1.0f);
+//     auto R_perp = param * (normalized_Rin + cos_theta * normalized_normal);
+
+//     auto R_prep_lenthg_squared = R_perp.length_squared();
+//     auto R_parallel = vec3 {
+//         - std::sqrt(std::fabs(1.0f - R_prep_lenthg_squared * normalized_normal.x())),
+//         - std::sqrt(std::fabs(1.0f - R_prep_lenthg_squared * normalized_normal.y())),
+//         - std::sqrt(std::fabs(1.0f - R_prep_lenthg_squared * normalized_normal.z()))
+//     };
+
+//     return R_parallel + R_perp;
+// }
+
+inline vec3 refract2(const vec3& uv, const vec3& n, double etai_over_etat)
+{
+    auto cos_theta = std::fmin(1.0, dot(-uv, n));
+    vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
+    vec3 r_out_parallel = - std::sqrt(std::fabs(1.0f - r_out_perp.length_squared())) * n;
+    return r_out_perp + r_out_parallel;
+}
+
 inline vec3 refract(const vec3& R_in, const vec3& normal, double param)
 {
     // R_in is the unit vector from outside to point the hit point
@@ -251,23 +291,14 @@ inline vec3 refract(const vec3& R_in, const vec3& normal, double param)
     auto normalized_Rin = normalize(R_in);
     auto normalized_normal = normalize(normal);
 
-    auto cos_theta = std::fmin(dot(normalized_Rin, normalized_normal), 1.0f);
-    auto R_perp = param * (normalized_Rin + cos_theta * normalized_normal);
-
-    auto R_prep_lenthg_squared = R_perp.length_squared();
-    auto R_parallel = vec3 {
-        - std::sqrt(1.0f - R_prep_lenthg_squared * normalized_normal.x()),
-        - std::sqrt(1.0f - R_prep_lenthg_squared * normalized_normal.y()),
-        - std::sqrt(1.0f - R_prep_lenthg_squared * normalized_normal.z())
-    };
+    auto cos_theta = std::fmin(dot(-normalized_Rin, normalized_normal), 1.0f);
+    vec3 R_perp = param * (normalized_Rin + cos_theta * normalized_normal);
+    
+    // Ensure no negative value under sqrt
+    auto R_perp_length_squared = R_perp.length_squared();
+    vec3 R_parallel = -std::sqrt(std::fabs(1.0f - R_perp_length_squared)) * normalized_normal;
 
     return R_parallel + R_perp;
 }
 
-inline vec3 refract2(const vec3& uv, const vec3& n, double etai_over_etat)
-{
-    auto cos_theta = std::fmin(1.0, dot(-uv, n));
-    vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
-    vec3 r_out_parallel = - std::sqrt(std::fabs(1.0f - r_out_perp.length_squared())) * n;
-    return r_out_perp + r_out_parallel;
-}
+

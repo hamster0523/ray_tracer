@@ -20,7 +20,12 @@ class metal : public material
             vec3 reflected = reflect(r_in.direction(), record.normal);
             reflected = normalize(reflected) + fuzzy_factor * random_unit_vector();
             record.mat_type = mat_type;
-            scattered = ray(record.p, reflected);
+
+            // Update the ray time == r_in.time()
+            // scattered = ray(record.p, reflected);
+            // --------------------------
+            scattered = ray(record.p, reflected, r_in.get_time());
+            
             attenuation = albe;
             // return true;
             // Check after fuzzy, the reflected ray is in the same side as the origin reflected ray
